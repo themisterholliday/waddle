@@ -1,86 +1,241 @@
-<!-- <script lang="ts">
-  import { get_color_for_set, get_game_state_manager, type StackItemAndIndex } from '../game/game_state';
-  import Board from './Board.svelte';
-  import StackItemSetGroup from './StackItemSetGroup.svelte';
-  import Winner from './Winner.svelte';
+<script lang="ts">
+  import {get_game_state_manager} from '../game/game_state';
+  import Confetti from './Confetti.svelte';
+  import Keyboard from './Keyboard.svelte';
 
-  function handle_state_change() {
-    game_state = game_state_manager.game_state;
-    set_0 = game_state_manager.get_stack_items_for_set(0);
-    set_1 = game_state_manager.get_stack_items_for_set(1);
-    set_2 = game_state_manager.get_stack_items_for_set(2);
-    set_3 = game_state_manager.get_stack_items_for_set(3);
-  }
+  let word_length = 5;
+  let game_state_manager = get_game_state_manager({word_length: word_length});
 
-  let game_state_manager = get_game_state_manager(handle_state_change);
+  $: game_state = game_state_manager.get_game_state();
+  $: playing_state = game_state.playing_state;
+  $: is_valid_word = check_is_valid_word(entered_word);
+
+  let entered_word = '';
+  let board_state = ['', '', '', '', '', ''];
 
   function reset() {
-    game_state_manager = get_game_state_manager(handle_state_change);
-    selected_item = undefined;
+    game_state_manager = get_game_state_manager({word_length: word_length});
   }
 
-  function handle_set_selected_item(event: CustomEvent<StackItemAndIndex>) {
-    selected_item = event.detail;
+  function update_board_state(entered_word: string) {
+    const current_index = 6 - game_state.tries_remaining;
+    board_state[current_index] = entered_word;
   }
 
-  function handle_board_seleceted_stack_item(event: CustomEvent<[number, number]>) {
-    if (selected_item !== undefined) {
-      const success = game_state_manager.update_stack_item_location(selected_item.index, event.detail);
-      if (success === true) {
-        selected_item = undefined;
-      }
+  function check_is_valid_word(entered_word: string) {
+    if (entered_word.length < word_length) {
+      return true;
     }
+    return game_state_manager.is_valid_word(entered_word);
   }
 
-  let selected_item: StackItemAndIndex | undefined = undefined;
-  $: game_state = game_state_manager.game_state;
-  $: set_0 = game_state_manager.get_stack_items_for_set(0);
-  $: set_1 = game_state_manager.get_stack_items_for_set(1);
-  $: set_2 = game_state_manager.get_stack_items_for_set(2);
-  $: set_3 = game_state_manager.get_stack_items_for_set(3);
-  $: winner = game_state.winner;
+  function is_all_letters(string: string) {
+    const regex = /^[A-Za-z]+$/;
+    return regex.test(string);
+  }
+
+  function handle_submit() {
+    if (!is_valid_word) {
+      return;
+    }
+    if (entered_word.length < word_length) {
+      return;
+    }
+
+    game_state = game_state_manager.guess_word(entered_word);
+    entered_word = '';
+  }
+
+  function handle_keydown(event: KeyboardEvent) {
+    handle_stroke(event.key);
+  }
+
+  function handle_stroke(key: string) {
+    if (game_state.playing_state !== 'playing') {
+      return;
+    }
+
+    if (game_state.tries_remaining === 0) {
+      return;
+    }
+
+    if (key === 'Backspace') {
+      entered_word = entered_word.slice(0, -1);
+      update_board_state(entered_word);
+      return;
+    }
+
+    if (key === 'Enter') {
+      handle_submit();
+      return;
+    }
+
+    if (key.length > 1) {
+      return;
+    }
+
+    if (!is_all_letters(key)) {
+      return;
+    }
+
+    const upper_key = key.toUpperCase();
+    if (entered_word.length >= word_length) {
+      return;
+    }
+    entered_word += upper_key;
+    update_board_state(entered_word);
+  }
+
+  function handle_guess() {
+    handle_submit();
+  }
+
+  function handle_restart() {
+    entered_word = '';
+    board_state = ['', '', '', '', '', ''];
+    reset();
+  }
 </script>
 
-<!-- <button class="reset_button" on:click={reset}>Reset</button>
-{#if winner !== undefined}
-  <Winner />
-{/if} -->
+{#if playing_state === 'succeeded'}
+  <Confetti
+    text={'Winner!'}
+    restart_button_text={'Go again'}
+    on:click={handle_restart}
+  />
+{/if}
+
+{#if playing_state === 'failed'}
+  <Confetti
+    text={'You Lost!'}
+    restart_button_text={'Try again'}
+    on:click={handle_restart}
+  />
+{/if}
+<svelte:body on:keydown={handle_keydown} />
 <div class="full_board">
-  <div class="guessing_area"></div>
-  <div class="typing_area"></div>
+  <div class="guessing_area" style="--word_length: {word_length};">
+    {#each board_state as group}
+      <div class="grid-group">
+        {#each Array.from({length: word_length}) as _, i}
+          {@const character = group[i] ?? ''}
+          <div
+            class="grid-item"
+            class:correct_guess={game_state.characters_correctly_guessed.find(
+              char => {
+                const value =
+                  char.character === character &&
+                  Number(char.index_in_word) === i;
+                return value;
+              }
+            )}
+            class:improper_guess={game_state.characters_correctly_guessed_but_improper_placement.find(
+              char => {
+                const value =
+                  char.character === character &&
+                  Number(char.index_in_word) === i;
+                return value;
+              }
+            )}
+          >
+            {character}
+          </div>
+        {/each}
+      </div>
+    {/each}
+  </div>
+  <div class="typing_area">
+    <Keyboard on:stroke={key => handle_stroke(key.detail)} />
+  </div>
+  <div class="guess_button_area">
+    {#if entered_word.length === word_length}
+      {#if is_valid_word}
+        <button on:click={handle_guess} class="guess_button submit">
+          Guess
+        </button>
+      {/if}
+      {#if !is_valid_word}
+        <button class="guess_button error"> Not a word! </button>
+      {/if}
+    {:else}
+      <button disabled class="guess_button"> Guess </button>
+    {/if}
+  </div>
 </div>
- -->
 
 <style>
   .full_board {
     height: 100%;
-    display: flex;
+    display: grid;
+    grid-template-rows: 1fr 0.6fr;
   }
 
-  .board {
-    grid-area: content;
-    aspect-ratio: 1 / 1;
+  .guessing_area {
+    display: grid;
+
+    margin: 0 auto;
+
+    grid-template-rows: repeat(6, 1fr);
+    grid-gap: 5px;
+    padding: 10px;
+    box-sizing: border-box;
   }
 
-  /* .stack_item_container_0 {
-    grid-area: header;
+  .grid-group {
+    grid-gap: 5px;
+    display: grid;
+    grid-template-columns: repeat(var(--word_length), 1fr);
   }
 
-  .stack_item_container_1 {
-    grid-area: side;
+  .grid-item {
+    width: 52px;
+    height: 52px;
+    border: solid 2px gray;
+    border-radius: 0.25rem;
+
+    /* color: var(--tile-text-color); */
+
+    font-family: 'Courier New';
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: bold;
+    vertical-align: middle;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
   }
 
-  .stack_item_container_2 {
-    grid-area: footer;
+  .typing_area {
   }
 
-  .stack_item_container_3 {
-    grid-area: nav;
+  .guess_button_area {
+    margin: 0 auto;
   }
 
-  .reset_button {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-  } */
+  .guess_button {
+    width: 8rem;
+    height: 3rem;
+    border-radius: 0.25rem;
+  }
+
+  .guess_button.submit {
+    background-color: lightblue;
+  }
+
+  .guess_button.error {
+    background-color: lightcoral;
+  }
+
+  .correct_guess {
+    background-color: lightgreen;
+  }
+
+  .improper_guess {
+    background-color: yellow;
+  }
 </style>

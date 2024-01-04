@@ -4,18 +4,18 @@
 
 import {get_default_words_db, type Word, type WordsDB} from './words_db';
 
-export interface CorrectlyGuessedCharacter {
+export interface CharacterAndIndex {
   character: string;
   index_in_word: string;
 }
 
 export interface GameState {
-  state: 'playing' | 'failed' | 'succeeded';
+  playing_state: 'playing' | 'failed' | 'succeeded';
   word_to_guess: Word;
   tries_remaining: number;
 
-  characters_correctly_guessed: CorrectlyGuessedCharacter[];
-  characters_correctly_guessed_but_improper_placement: string[];
+  characters_correctly_guessed: CharacterAndIndex[];
+  characters_correctly_guessed_but_improper_placement: CharacterAndIndex[];
 
   characters_incorrectly_guessed: string[];
 }
@@ -33,27 +33,13 @@ export interface GameStateManager {
 
 function get_initial_game_state(word_to_guess: Word): GameState {
   return {
-    state: 'playing',
+    playing_state: 'playing',
     word_to_guess,
     tries_remaining: 6,
     characters_correctly_guessed: [],
     characters_correctly_guessed_but_improper_placement: [],
     characters_incorrectly_guessed: [],
   };
-}
-
-function get_updated_improper_placement_array({
-  characters_correctly_guessed,
-  characters_correctly_guessed_but_improper_placement,
-}: {
-  characters_correctly_guessed: CorrectlyGuessedCharacter[];
-  characters_correctly_guessed_but_improper_placement: string[];
-}): string[] {
-  const clean_improper_placement =
-    characters_correctly_guessed_but_improper_placement.filter(
-      x => !characters_correctly_guessed.map(x => x.character).includes(x)
-    );
-  return clean_improper_placement;
 }
 
 interface IGameStateManagerOptions {
@@ -66,8 +52,10 @@ export function get_game_state_manager({
   word_length,
 }: IGameStateManagerOptions): GameStateManager {
   const random_word = words_db.get_random_word_by({word_length});
+  // console.log('🚀 ~ file: game_state.ts:69 ~ random_word:', random_word);
   let parent_state = get_initial_game_state(random_word);
 
+  // TODO: (Craig Holliday 01/04/2024) Make it to where we can have two character correct guesses with different indexes
   function get_updated_new_state(new_state: GameState): GameState {
     return {
       ...new_state,
@@ -107,18 +95,12 @@ export function get_game_state_manager({
       // - has symbols
       // - is all capital letters
 
-      // check is correct word
-      if (word === new_state.word_to_guess.name) {
-        new_state = get_updated_new_state({...new_state, state: 'succeeded'});
-        parent_state = {...new_state};
-        return new_state;
-      }
-
-      const new_characters_correctly_guessed: CorrectlyGuessedCharacter[] = [
+      const new_characters_correctly_guessed: CharacterAndIndex[] = [
         ...new_state.characters_correctly_guessed,
       ];
-      const new_characters_correctly_guessed_but_improper_placement: string[] =
-        [...new_state.characters_correctly_guessed_but_improper_placement];
+      const new_characters_correctly_guessed_but_improper_placement = [
+        ...new_state.characters_correctly_guessed_but_improper_placement,
+      ];
       const new_characters_incorrectly_guessed = [
         ...new_state.characters_incorrectly_guessed,
       ];
@@ -127,13 +109,9 @@ export function get_game_state_manager({
       // - characters_correctly_guessed
       // - characters_correctly_guessed_but_improper_placement
       // - characters_incorrectly_guessed
-      const previous_characters: string[] = [];
       for (const [index, character] of word.split('').entries()) {
         if (!new_state.word_to_guess.name.includes(character)) {
           new_characters_incorrectly_guessed.push(character);
-          continue;
-        }
-        if (previous_characters.includes(character)) {
           continue;
         }
         if (new_state.word_to_guess.name[index] === character) {
@@ -142,21 +120,12 @@ export function get_game_state_manager({
             index_in_word: index.toString(),
           });
         } else {
-          new_characters_correctly_guessed_but_improper_placement.push(
-            character
-          );
+          new_characters_correctly_guessed_but_improper_placement.push({
+            character,
+            index_in_word: index.toString(),
+          });
         }
-
-        previous_characters.push(character);
       }
-
-      // update correctly guessed arrays so that none in the correctly guessed array are in the improperly placed array
-      const clean_improper_placement_array =
-        get_updated_improper_placement_array({
-          characters_correctly_guessed: new_characters_correctly_guessed,
-          characters_correctly_guessed_but_improper_placement:
-            new_characters_correctly_guessed_but_improper_placement,
-        });
 
       // subtract tries_remaining
       const new_tries_remaining = new_state.tries_remaining - 1;
@@ -165,7 +134,7 @@ export function get_game_state_manager({
         new_state = get_updated_new_state({
           ...new_state,
           tries_remaining: new_tries_remaining,
-          state: 'failed',
+          playing_state: 'failed',
         });
         parent_state = {...new_state};
         return new_state;
@@ -176,10 +145,22 @@ export function get_game_state_manager({
         tries_remaining: new_tries_remaining,
         characters_correctly_guessed: new_characters_correctly_guessed,
         characters_correctly_guessed_but_improper_placement:
-          clean_improper_placement_array,
+          new_characters_correctly_guessed_but_improper_placement,
         characters_incorrectly_guessed: new_characters_incorrectly_guessed,
       });
       parent_state = {...new_state};
+
+      // NOTE: do this at the end so everything still updates
+      // check is correct word
+      if (word === new_state.word_to_guess.name) {
+        new_state = get_updated_new_state({
+          ...new_state,
+          playing_state: 'succeeded',
+        });
+        parent_state = {...new_state};
+        return new_state;
+      }
+
       return new_state;
     },
     get_hint: () => {
@@ -197,18 +178,10 @@ export function get_game_state_manager({
         ...new_state.characters_correctly_guessed,
         selected_character,
       ];
-      // update correctly guessed arrays so that none in the correctly guessed array are in the improperly placed array
-      const clean_improper_placement_array =
-        get_updated_improper_placement_array({
-          characters_correctly_guessed: new_characters_correctly_guessed,
-          characters_correctly_guessed_but_improper_placement:
-            new_state.characters_correctly_guessed_but_improper_placement,
-        });
+
       new_state = get_updated_new_state({
         ...new_state,
         characters_correctly_guessed: new_characters_correctly_guessed,
-        characters_correctly_guessed_but_improper_placement:
-          clean_improper_placement_array,
       });
       parent_state = {...new_state};
       return new_state;

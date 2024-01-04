@@ -5,9 +5,9 @@
 <main>
   <!-- App -->
   <!-- <p class="title">Waddle Waddle</p> -->
-  <span class="container">
+  <div class="container">
     <FullGameBoard />
-  </span>
+  </div>
 </main>
 
 <style>
@@ -16,17 +16,8 @@
   }
 
   .container {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .title {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-
-    font-style: italic;
+    margin: 0 auto;
+    height: 600px;
+    width: min(100%, 32rem);
   }
 </style>
