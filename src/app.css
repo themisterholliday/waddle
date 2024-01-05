@@ -113,7 +113,6 @@ body {
 
 #app {
   height: 100%;
-  max-width: none;
   padding: 0;
   max-height: -webkit-fill-available;
   touch-action: pan-x pan-y;

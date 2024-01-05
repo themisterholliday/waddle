@@ -242,6 +242,7 @@
 <style>
   .full_board {
     height: 100%;
+    max-width: 100%;
     display: grid;
     grid-template-rows: 1fr 0.6fr;
   }
@@ -253,17 +254,20 @@
 
     grid-template-rows: repeat(6, 1fr);
     grid-gap: 5px;
-    padding: 10px;
+    padding-block: 10px;
     box-sizing: border-box;
   }
 
   .grid-group {
-    grid-gap: 5px;
+    --grid_group_gap: 5px;
+    grid-gap: var(--grid_group_gap);
     display: grid;
     grid-template-columns: repeat(var(--word_length), 1fr);
   }
 
   .grid-item {
+    max-width: calc(100vw / var(--word_length) - var(--grid_group_gap));
+
     width: 52px;
     height: 52px;
     border: solid 2px gray;
