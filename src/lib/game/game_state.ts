@@ -130,16 +130,6 @@ export function get_game_state_manager({
       // subtract tries_remaining
       const new_tries_remaining = new_state.tries_remaining - 1;
 
-      if (new_tries_remaining <= 0) {
-        new_state = get_updated_new_state({
-          ...new_state,
-          tries_remaining: new_tries_remaining,
-          playing_state: 'failed',
-        });
-        parent_state = {...new_state};
-        return new_state;
-      }
-
       new_state = get_updated_new_state({
         ...new_state,
         tries_remaining: new_tries_remaining,
@@ -156,6 +146,17 @@ export function get_game_state_manager({
         new_state = get_updated_new_state({
           ...new_state,
           playing_state: 'succeeded',
+        });
+        parent_state = {...new_state};
+        return new_state;
+      }
+
+      // Check failure state last
+      if (new_tries_remaining <= 0) {
+        new_state = get_updated_new_state({
+          ...new_state,
+          tries_remaining: new_tries_remaining,
+          playing_state: 'failed',
         });
         parent_state = {...new_state};
         return new_state;

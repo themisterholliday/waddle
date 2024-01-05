@@ -2,9 +2,12 @@
   import {get_game_state_manager} from '../game/game_state';
   import Confetti from './Confetti.svelte';
   import Keyboard from './Keyboard.svelte';
+  import Settings from './Settings.svelte';
 
   let word_length = 5;
   let game_state_manager = get_game_state_manager({word_length: word_length});
+
+  let word_length_options = [2, 3, 4, 5, 6, 7, 8];
 
   $: game_state = game_state_manager.get_game_state();
   $: playing_state = game_state.playing_state;
@@ -12,7 +15,14 @@
   $: incorrect_keys = game_state.characters_incorrectly_guessed;
 
   let entered_word = '';
-  let board_state = ['', '', '', '', '', ''];
+  let board_state = [
+    {word: '', complete: false},
+    {word: '', complete: false},
+    {word: '', complete: false},
+    {word: '', complete: false},
+    {word: '', complete: false},
+    {word: '', complete: false},
+  ];
 
   function reset() {
     game_state_manager = get_game_state_manager({word_length: word_length});
@@ -20,7 +30,7 @@
 
   function update_board_state(entered_word: string) {
     const current_index = 6 - game_state.tries_remaining;
-    board_state[current_index] = entered_word;
+    board_state[current_index] = {word: entered_word, complete: false};
   }
 
   function check_is_valid_word(entered_word: string) {
@@ -43,6 +53,8 @@
       return;
     }
 
+    const current_index = 6 - game_state.tries_remaining;
+    board_state[current_index] = {word: entered_word, complete: true};
     game_state = game_state_manager.guess_word(entered_word);
     entered_word = '';
   }
@@ -93,8 +105,26 @@
 
   function handle_restart() {
     entered_word = '';
-    board_state = ['', '', '', '', '', ''];
+    board_state = [
+      {word: '', complete: false},
+      {word: '', complete: false},
+      {word: '', complete: false},
+      {word: '', complete: false},
+      {word: '', complete: false},
+      {word: '', complete: false},
+    ];
     reset();
+  }
+
+  let dialog_open = false;
+
+  function open_dialog() {
+    dialog_open = !dialog_open;
+  }
+
+  function handle_word_length_change(event: CustomEvent) {
+    word_length = event.detail;
+    handle_restart();
   }
 </script>
 
@@ -114,31 +144,72 @@
 {/if}
 <svelte:body on:keydown={handle_keydown} />
 <div class="full_board">
+  <button class="settings-cog" on:click|stopPropagation={open_dialog}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.847.516 1.874.282 2.572-1.065z"
+      ></path>
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      ></path>
+    </svg>
+  </button>
+
+  <Settings
+    bind:open={dialog_open}
+    {word_length}
+    {word_length_options}
+    on:word_length_change={handle_word_length_change}
+  />
+
   <div class="guessing_area" style="--word_length: {word_length};">
     {#each board_state as group}
       <div class="grid-group">
         {#each Array.from({length: word_length}) as _, i}
-          {@const character = group[i] ?? ''}
+          {@const character = group.word[i] ?? ''}
           <div
             class="grid-item"
-            class:correct_guess={game_state.characters_correctly_guessed.find(
-              char => {
-                const value =
-                  char.character === character &&
-                  Number(char.index_in_word) === i;
-                return value;
-              }
-            )}
-            class:improper_guess={game_state.characters_correctly_guessed_but_improper_placement.find(
-              char => {
-                const value =
-                  char.character === character &&
-                  Number(char.index_in_word) === i;
-                return value;
-              }
-            )}
+            class:flip={group.complete === true}
+            style:transition-delay={i * 100 + 'ms'}
           >
-            {character}
+            <div class="front">
+              {character}
+            </div>
+            <div
+              class="back"
+              class:correct_guess={game_state.characters_correctly_guessed.find(
+                char => {
+                  const value =
+                    char.character === character &&
+                    Number(char.index_in_word) === i;
+                  return value;
+                }
+              )}
+              class:improper_guess={game_state.characters_correctly_guessed_but_improper_placement.find(
+                char => {
+                  const value =
+                    char.character === character &&
+                    Number(char.index_in_word) === i;
+                  return value;
+                }
+              )}
+              class:incorrect_guess={game_state.characters_incorrectly_guessed.includes(
+                character
+              ) && group.complete === true}
+            >
+              {character}
+            </div>
           </div>
         {/each}
       </div>
@@ -208,6 +279,7 @@
     vertical-align: middle;
     box-sizing: border-box;
     text-transform: uppercase;
+
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
@@ -236,9 +308,60 @@
 
   .correct_guess {
     background-color: lightgreen;
+    color: white;
   }
 
   .improper_guess {
-    background-color: yellow;
+    background-color: #ffbf00;
+    color: white;
+  }
+
+  .incorrect_guess {
+    background-color: lightslategray;
+    color: white;
+  }
+
+  .grid-item {
+    perspective: 1000px;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+  }
+
+  .grid-item.flip {
+    transform: rotateX(180deg);
+  }
+
+  .grid-item .front,
+  .grid-item .back {
+    font-family: 'Courier New';
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: bold;
+    vertical-align: middle;
+    box-sizing: border-box;
+    text-transform: uppercase;
+
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+  }
+
+  .grid-item .back {
+    transform: rotateX(180deg);
+  }
+
+  .settings-cog {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    width: 52px;
+    height: 52px;
   }
 </style>
