@@ -52,11 +52,11 @@ export function get_game_state_manager({
   word_length,
 }: IGameStateManagerOptions): GameStateManager {
   const random_word = words_db.get_random_word_by({word_length});
-  // console.log('🚀 ~ file: game_state.ts:69 ~ random_word:', random_word);
+  console.log('🚀 ~ file: game_state.ts:69 ~ random_word:', random_word);
   let parent_state = get_initial_game_state(random_word);
 
-  // TODO: (Craig Holliday 01/04/2024) Make it to where we can have two character correct guesses with different indexes
   function get_updated_new_state(new_state: GameState): GameState {
+    // TODO: (Craig Holliday 01/04/2024) may not need this
     return {
       ...new_state,
       characters_correctly_guessed:

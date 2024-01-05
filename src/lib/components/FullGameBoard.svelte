@@ -9,6 +9,7 @@
   $: game_state = game_state_manager.get_game_state();
   $: playing_state = game_state.playing_state;
   $: is_valid_word = check_is_valid_word(entered_word);
+  $: incorrect_keys = game_state.characters_incorrectly_guessed;
 
   let entered_word = '';
   let board_state = ['', '', '', '', '', ''];
@@ -104,7 +105,6 @@
     on:click={handle_restart}
   />
 {/if}
-
 {#if playing_state === 'failed'}
   <Confetti
     text={'You Lost!'}
@@ -145,7 +145,10 @@
     {/each}
   </div>
   <div class="typing_area">
-    <Keyboard on:stroke={key => handle_stroke(key.detail)} />
+    <Keyboard
+      on:stroke={key => handle_stroke(key.detail)}
+      bind:incorrect_keys
+    />
   </div>
   <div class="guess_button_area">
     {#if entered_word.length === word_length}
