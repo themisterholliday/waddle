@@ -286,6 +286,7 @@
   }
 
   .typing_area {
+    padding-inline: 8px;
   }
 
   .guess_button_area {
@@ -361,7 +362,7 @@
     padding: 0;
     margin: 0;
 
-    width: 52px;
-    height: 52px;
+    width: 42px;
+    height: 42px;
   }
 </style>

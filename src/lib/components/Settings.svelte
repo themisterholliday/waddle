@@ -68,10 +68,10 @@
 
 <style>
   dialog {
+    margin-top: 2rem;
     width: 80%;
-    height: 100%;
     max-width: 500px;
-    max-height: 600px;
+    max-height: 100%;
     padding: 20px;
     border: none;
     border-radius: 5px;
