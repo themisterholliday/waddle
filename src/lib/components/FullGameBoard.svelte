@@ -130,14 +130,16 @@
 
 {#if playing_state === 'succeeded'}
   <Confetti
-    text={'Winner!'}
+    title={'Winner!'}
+    subtitle={`The word is ${game_state.word_to_guess.name}`}
     restart_button_text={'Go again'}
     on:click={handle_restart}
   />
 {/if}
 {#if playing_state === 'failed'}
   <Confetti
-    text={'You Lost!'}
+    title={'You Lost!'}
+    subtitle={`The word is ${game_state.word_to_guess.name}`}
     restart_button_text={'Try again'}
     on:click={handle_restart}
   />
@@ -364,5 +366,7 @@
 
     width: 42px;
     height: 42px;
+
+    -webkit-tap-highlight-color: transparent;
   }
 </style>

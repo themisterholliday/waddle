@@ -70,8 +70,9 @@
   dialog {
     margin-top: 2rem;
     width: 80%;
+    height: 100%;
     max-width: 500px;
-    max-height: 100%;
+    max-height: 400px;
     padding: 20px;
     border: none;
     border-radius: 5px;
