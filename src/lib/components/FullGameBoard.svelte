@@ -72,13 +72,13 @@
       return;
     }
 
-    if (key === 'BACKSPACE') {
+    if (key === 'BACKSPACE' || key === 'Backspace') {
       entered_word = entered_word.slice(0, -1);
       update_board_state(entered_word);
       return;
     }
 
-    if (key === 'ENTER') {
+    if (key === 'ENTER' || key === 'Enter') {
       handle_submit();
       return;
     }

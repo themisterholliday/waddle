@@ -8,7 +8,7 @@
   }>();
 
   function handle_key_press(event: Event) {
-    const target = event.target as HTMLButtonElement;
+    const target = event.currentTarget as HTMLButtonElement;
     const key = target.getAttribute('data-key');
     if (!key) {
       return;
