@@ -1,4 +1,5 @@
 <script lang="ts">
+  import happy_penguin from '../../assets/happy_penguin.png';
   import {get_game_state_manager} from '../game/game_state';
   import Confetti from './Confetti.svelte';
   import Keyboard from './Keyboard.svelte';
@@ -135,14 +136,14 @@
   }
 </script>
 
-{#if playing_state === 'succeeded'}
+<!-- {#if playing_state === 'succeeded'}
   <Confetti
     title={'Winner!'}
     subtitle={`The word is ${game_state.word_to_guess}`}
     restart_button_text={'Go again'}
     on:click={handle_restart}
   />
-{/if}
+{/if} -->
 {#if playing_state === 'failed'}
   <Confetti
     title={'You Lost!'}
@@ -151,36 +152,48 @@
     on:click={handle_restart}
   />
 {/if}
-<svelte:body on:keydown={handle_keydown} />
-<div class="full_board">
-  <button class="settings-cog" on:click|stopPropagation={open_dialog}>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.847.516 1.874.282 2.572-1.065z"
-      ></path>
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-      ></path>
-    </svg>
-  </button>
 
-  <Settings
-    bind:open={dialog_open}
-    {word_length}
-    {word_length_options}
-    on:word_length_change={handle_word_length_change}
-  />
+<svelte:body on:keydown={handle_keydown} />
+
+<Settings
+  bind:open={dialog_open}
+  {word_length}
+  {word_length_options}
+  on:word_length_change={handle_word_length_change}
+/>
+
+<div class="full_board">
+  <header class="header">
+    <div class="header_title">
+      <img
+        class:dance={game_state.playing_state === 'succeeded'}
+        src={happy_penguin}
+        alt="penguin"
+      />
+      <h1>Waddle</h1>
+    </div>
+    <button class="settings-cog" on:click|stopPropagation={open_dialog}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.847.516 1.874.282 2.572-1.065z"
+        ></path>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+        ></path>
+      </svg>
+    </button>
+  </header>
 
   <div class="guessing_area" style="--word_length: {word_length};">
     {#each board_state as group}
@@ -190,33 +203,34 @@
           <div
             class="grid-item"
             class:flip={group.complete === true}
-            style:transition-delay={i * 100 + 'ms'}
+            style:transition-delay={i * (100 * 1.8) + 'ms'}
+            style:animation-delay={i * 100 + 'ms'}
+            class:correct_guess={game_state.characters_correctly_guessed.find(
+              char => {
+                const value =
+                  char.character === character &&
+                  Number(char.index_in_word) === i;
+                return value;
+              }
+            ) && group.complete === true}
+            class:improper_guess={game_state.characters_correctly_guessed_but_improper_placement.find(
+              char => {
+                const value =
+                  char.character === character &&
+                  Number(char.index_in_word) === i;
+                return value;
+              }
+            ) && group.complete === true}
+            class:incorrect_guess={game_state.characters_incorrectly_guessed.includes(
+              character
+            ) && group.complete === true}
           >
-            <div class="front">
-              {character}
-            </div>
-            <div
-              class="back"
-              class:correct_guess={game_state.characters_correctly_guessed.find(
-                char => {
-                  const value =
-                    char.character === character &&
-                    Number(char.index_in_word) === i;
-                  return value;
-                }
-              )}
-              class:improper_guess={game_state.characters_correctly_guessed_but_improper_placement.find(
-                char => {
-                  const value =
-                    char.character === character &&
-                    Number(char.index_in_word) === i;
-                  return value;
-                }
-              )}
-              class:incorrect_guess={game_state.characters_incorrectly_guessed.includes(
-                character
-              ) && group.complete === true}
-            >
+            {#if game_state.playing_state === 'succeeded' && game_state.word_to_guess === group.word}
+              <div class="winning_penguin dance">
+                <img src={happy_penguin} alt="penguin" />
+              </div>
+            {/if}
+            <div class="grid_item_content">
               {character}
             </div>
           </div>
@@ -275,14 +289,19 @@
   }
 
   .grid-item {
+    position: relative;
     max-width: calc(100vw / var(--word_length) - var(--grid_group_gap));
 
     width: 52px;
     height: 52px;
+    border-radius: 0.25rem;
+  }
+
+  .grid_item_content {
+    width: 100%;
+    height: 100%;
     border: solid 2px gray;
     border-radius: 0.25rem;
-
-    /* color: var(--tile-text-color); */
 
     font-family: 'Courier New';
     display: inline-flex;
@@ -337,39 +356,6 @@
     color: white;
   }
 
-  .grid-item {
-    perspective: 1000px;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-  }
-
-  .grid-item.flip {
-    transform: rotateX(180deg);
-  }
-
-  .grid-item .front,
-  .grid-item .back {
-    font-family: 'Courier New';
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    line-height: 1;
-    font-weight: bold;
-    vertical-align: middle;
-    box-sizing: border-box;
-    text-transform: uppercase;
-
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-  }
-
-  .grid-item .back {
-    transform: rotateX(180deg);
-  }
-
   .settings-cog {
     cursor: pointer;
     background: none;
@@ -381,5 +367,92 @@
     height: 42px;
 
     -webkit-tap-highlight-color: transparent;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .header_title {
+    display: flex;
+    align-items: center;
+  }
+
+  .header_title img {
+    height: 42px;
+    margin-right: 0.25rem;
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    10% {
+      transform: scale(1.1);
+    }
+    15% {
+      transform: scale(1);
+    }
+    75% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .grid-item > .grid_item_content:empty {
+    animation: none;
+  }
+
+  .grid-item > .grid_item_content:not(:empty) {
+    animation: pop 400ms ease-in-out;
+  }
+
+  .grid-item.flip {
+    animation: flip 500ms ease forwards;
+  }
+
+  @keyframes flip {
+    0% {
+      transform: scaleY(1);
+    }
+
+    50% {
+      transform: scaleY(0);
+    }
+
+    100% {
+      transform: scaleY(1);
+    }
+  }
+
+  .winning_penguin {
+    --height: 20px;
+    position: absolute;
+    bottom: 100%;
+    left: calc(50% - calc(var(--height) / 2));
+    z-index: 1;
+    width: var(--height);
+    height: var(--height);
+  }
+
+  .dance {
+    animation: dance 1000ms linear forwards infinite;
+  }
+
+  @keyframes dance {
+    0%,
+    50% {
+      transform: scaleX(-1);
+    }
+
+    51%,
+    100% {
+      transform: scaleX(1);
+    }
   }
 </style>

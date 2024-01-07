@@ -177,8 +177,8 @@
   }
 
   .keyboard_key {
-    --text-color: white;
-    --key-bg: gray;
+    --text-color: black;
+    --key-bg: lightgray;
 
     font-family: 'Courier New';
     font-size: 1.25rem;
@@ -225,6 +225,7 @@
   }
 
   .incorrect_key {
-    opacity: 0.5;
+    background-color: gray;
+    color: white;
   }
 </style>

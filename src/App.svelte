@@ -4,7 +4,6 @@
 
 <main>
   <!-- App -->
-  <!-- <p class="title">Waddle Waddle</p> -->
   <div class="container">
     <FullGameBoard />
   </div>
