@@ -1,11 +1,10 @@
 import {describe, expect, it} from 'vitest';
 import {get_game_state_manager} from './game_state';
-
-import type {Word, WordsDB} from './words_db';
+import type {WordsDB} from './words_db';
 
 describe('Game State is Init', () => {
   it('has default game state', () => {
-    const word = {name: 'TEST', definition: 'test'};
+    const word = 'TEST';
     const words_db = build_mock_words_db(word);
     const state_manager = get_game_state_manager({words_db, word_length: 4});
     expect(state_manager.get_game_state().playing_state).toEqual('playing');
@@ -23,7 +22,7 @@ describe('Game State is Init', () => {
 
 describe('Playing Scenarios', () => {
   it('1 guess', () => {
-    const word = {name: 'TEST', definition: 'test'};
+    const word = 'TEST';
     const words_db = build_mock_words_db(word);
     const state_manager = get_game_state_manager({words_db, word_length: 4});
 
@@ -43,7 +42,7 @@ describe('Playing Scenarios', () => {
   });
 
   it('2 guesses', () => {
-    const word = {name: 'TEST', definition: 'test'};
+    const word = 'TEST';
     const words_db = build_mock_words_db(word);
     const state_manager = get_game_state_manager({words_db, word_length: 4});
 
@@ -84,7 +83,7 @@ describe('Playing Scenarios', () => {
   });
 
   it('3 guesses - succeeded', () => {
-    const word = {name: 'TEST', definition: 'test'};
+    const word = 'TEST';
     const words_db = build_mock_words_db(word);
     const state_manager = get_game_state_manager({words_db, word_length: 4});
 
@@ -128,7 +127,50 @@ describe('Playing Scenarios', () => {
   });
 
   it('6 guesses - failed', () => {
-    const word = {name: 'TEST', definition: 'test'};
+    const word = 'TEST';
+    const words_db = build_mock_words_db(word);
+    const state_manager = get_game_state_manager({words_db, word_length: 4});
+
+    const game_state = state_manager.guess_word('TATE');
+    expect(game_state.playing_state).toEqual('playing');
+    expect(game_state.tries_remaining).toEqual(5);
+    expect(game_state.characters_correctly_guessed).toEqual([
+      {character: 'T', index_in_word: '0'},
+    ]);
+    expect(
+      game_state.characters_correctly_guessed_but_improper_placement
+    ).toEqual([
+      {character: 'T', index_in_word: '2'},
+      {character: 'E', index_in_word: '3'},
+    ]);
+    expect(game_state.characters_incorrectly_guessed).toEqual(['A']);
+
+    const game_state_2 = state_manager.guess_word('TELL');
+    expect(game_state_2.playing_state).toEqual('playing');
+    expect(game_state_2.tries_remaining).toEqual(4);
+    expect(game_state_2.characters_correctly_guessed).toEqual([
+      {character: 'T', index_in_word: '0'},
+      {character: 'E', index_in_word: '1'},
+    ]);
+    expect(
+      game_state_2.characters_correctly_guessed_but_improper_placement
+    ).toEqual([
+      {character: 'T', index_in_word: '2'},
+      {character: 'E', index_in_word: '3'},
+    ]);
+    expect(game_state_2.characters_incorrectly_guessed).toEqual(['A', 'L']);
+
+    state_manager.guess_word('TELL');
+    state_manager.guess_word('TELL');
+    state_manager.guess_word('TELL');
+
+    const game_state_failed = state_manager.guess_word('TELL');
+    expect(game_state_failed.playing_state).toEqual('failed');
+    expect(game_state_failed.tries_remaining).toEqual(0);
+  });
+
+  it('6 guesses - 5 wrong, 1 right', () => {
+    const word = 'TEST';
     const words_db = build_mock_words_db(word);
     const state_manager = get_game_state_manager({words_db, word_length: 4});
 
@@ -171,7 +213,7 @@ describe('Playing Scenarios', () => {
   });
 
   it('1 guess - two correctly guessed characters of same character', () => {
-    const word = {name: 'TEST', definition: 'test'};
+    const word = 'TEST';
     const words_db = build_mock_words_db(word);
     const state_manager = get_game_state_manager({words_db, word_length: 4});
 
@@ -191,7 +233,7 @@ describe('Playing Scenarios', () => {
 
 describe('Hint', () => {
   it('1 hint', () => {
-    const word = {name: 'TEST', definition: 'test'};
+    const word = 'TEST';
     const words_db = build_mock_words_db(word);
     const state_manager = get_game_state_manager({words_db, word_length: 4});
 
@@ -211,12 +253,15 @@ describe('Hint', () => {
   });
 });
 
-function build_mock_words_db(word: Word): WordsDB {
+function build_mock_words_db(word: string): WordsDB {
   return {
-    get_all_words: () => {
-      return {[word.name.length]: [word]};
+    get_all_selectable_words: () => {
+      return {[word.length]: [word]};
     },
-    get_random_word_by() {
+    get_all_dictionary_words: () => {
+      return {[word.length]: [word]};
+    },
+    get_random_selectable_word_by() {
       return word;
     },
   };

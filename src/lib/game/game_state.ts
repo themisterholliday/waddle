@@ -2,7 +2,7 @@
 // * Game State & Usage
 // *===================================
 
-import {get_default_words_db, type Word, type WordsDB} from './words_db';
+import {get_default_words_db, type WordsDB} from './words_db';
 
 export interface CharacterAndIndex {
   character: string;
@@ -11,7 +11,7 @@ export interface CharacterAndIndex {
 
 export interface GameState {
   playing_state: 'playing' | 'failed' | 'succeeded';
-  word_to_guess: Word;
+  word_to_guess: string;
   tries_remaining: number;
 
   characters_correctly_guessed: CharacterAndIndex[];
@@ -31,7 +31,7 @@ export interface GameStateManager {
   get_hint: () => GameState;
 }
 
-function get_initial_game_state(word_to_guess: Word): GameState {
+function get_initial_game_state(word_to_guess: string): GameState {
   return {
     playing_state: 'playing',
     word_to_guess,
@@ -51,7 +51,7 @@ export function get_game_state_manager({
   words_db = get_default_words_db(),
   word_length,
 }: IGameStateManagerOptions): GameStateManager {
-  const random_word = words_db.get_random_word_by({word_length});
+  const random_word = words_db.get_random_selectable_word_by({word_length});
   console.log('🚀 ~ file: game_state.ts:69 ~ random_word:', random_word);
   let parent_state = get_initial_game_state(random_word);
 
@@ -83,8 +83,8 @@ export function get_game_state_manager({
     get_game_state: () => parent_state,
     is_valid_word: word => {
       return words_db
-        .get_all_words()
-        [word.length].some(value => word === value.name);
+        .get_all_dictionary_words()
+        [word.length].some(value => word === value);
     },
     guess_word: word => {
       let new_state = {...parent_state};
@@ -110,11 +110,11 @@ export function get_game_state_manager({
       // - characters_correctly_guessed_but_improper_placement
       // - characters_incorrectly_guessed
       for (const [index, character] of word.split('').entries()) {
-        if (!new_state.word_to_guess.name.includes(character)) {
+        if (!new_state.word_to_guess.includes(character)) {
           new_characters_incorrectly_guessed.push(character);
           continue;
         }
-        if (new_state.word_to_guess.name[index] === character) {
+        if (new_state.word_to_guess[index] === character) {
           new_characters_correctly_guessed.push({
             character,
             index_in_word: index.toString(),
@@ -142,7 +142,7 @@ export function get_game_state_manager({
 
       // NOTE: do this at the end so everything still updates
       // check is correct word
-      if (word === new_state.word_to_guess.name) {
+      if (word === new_state.word_to_guess) {
         new_state = get_updated_new_state({
           ...new_state,
           playing_state: 'succeeded',
@@ -168,9 +168,10 @@ export function get_game_state_manager({
       let new_state = {...parent_state};
       // pick a random not yet guessed character and add it to correctly guessed characters
       const random_index = Math.floor(
-        Math.random() * new_state.word_to_guess.name.length
+        Math.random() * new_state.word_to_guess.length
       );
-      const random_character = new_state.word_to_guess.name[random_index];
+
+      const random_character = new_state.word_to_guess[random_index];
       const selected_character = {
         character: random_character,
         index_in_word: random_index.toString(),

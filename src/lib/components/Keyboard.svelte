@@ -1,6 +1,8 @@
 <script lang="ts">
   import {createEventDispatcher} from 'svelte';
 
+  export let correct_keys: string[] = [];
+  export let improper_keys: string[] = [];
   export let incorrect_keys: string[] = [];
 
   const dispatch = createEventDispatcher<{
@@ -56,6 +58,27 @@
       class: _class,
     };
   });
+
+  function get_key_state_class(
+    character: string,
+    correct_keys: string[],
+    improper_keys: string[],
+    incorrect_keys: string[]
+  ) {
+    const is_in_correct_keys = correct_keys.includes(character);
+    const is_in_improper_keys = improper_keys.includes(character);
+    const is_in_incorrect_keys = incorrect_keys.includes(character);
+
+    if (is_in_correct_keys) {
+      return 'correct_key';
+    }
+    if (is_in_improper_keys) {
+      return 'improper_key';
+    }
+    if (is_in_incorrect_keys) {
+      return 'incorrect_key';
+    }
+  }
 </script>
 
 <div class="keyboard" role="group" aria-label="Keyboard">
@@ -66,9 +89,12 @@
         data-key={key['data-key']}
         aria-label={key['aria-label']}
         aria-disabled={false}
-        class={`${key.class} ${
-          incorrect_keys.includes(key.character) ? 'incorrect_key' : ''
-        }`}
+        class={`${key.class} ${get_key_state_class(
+          key.character,
+          correct_keys,
+          improper_keys,
+          incorrect_keys
+        )}`}
         on:click={handle_key_press}
       >
         {key.character}
@@ -83,9 +109,12 @@
         data-key={key['data-key']}
         aria-label={key['aria-label']}
         aria-disabled={false}
-        class={`${key.class} ${
-          incorrect_keys.includes(key.character) ? 'incorrect_key' : ''
-        }`}
+        class={`${key.class} ${get_key_state_class(
+          key.character,
+          correct_keys,
+          improper_keys,
+          incorrect_keys
+        )}`}
         on:click={handle_key_press}
       >
         {key.character}
@@ -100,9 +129,12 @@
         data-key={key['data-key']}
         aria-label={key['aria-label']}
         aria-disabled={false}
-        class={`${key.class} ${
-          incorrect_keys.includes(key.character) ? 'incorrect_key' : ''
-        }`}
+        class={`${key.class} ${get_key_state_class(
+          key.character,
+          correct_keys,
+          improper_keys,
+          incorrect_keys
+        )}`}
         on:click={handle_key_press}
       >
         {#if key.character === 'BACKSPACE'}
@@ -180,6 +212,16 @@
 
   .keyboard_key-one_and_a_half {
     flex: 1.5;
+  }
+
+  .correct_key {
+    background-color: lightgreen;
+    color: white;
+  }
+
+  .improper_key {
+    background-color: #ffbf00;
+    color: white;
   }
 
   .incorrect_key {

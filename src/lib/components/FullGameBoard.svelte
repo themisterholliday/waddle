@@ -12,6 +12,13 @@
   $: game_state = game_state_manager.get_game_state();
   $: playing_state = game_state.playing_state;
   $: is_valid_word = check_is_valid_word(entered_word);
+  $: correct_keys = game_state.characters_correctly_guessed.map(
+    x => x.character
+  );
+  $: improper_keys =
+    game_state.characters_correctly_guessed_but_improper_placement.map(
+      x => x.character
+    );
   $: incorrect_keys = game_state.characters_incorrectly_guessed;
 
   let entered_word = '';
@@ -131,7 +138,7 @@
 {#if playing_state === 'succeeded'}
   <Confetti
     title={'Winner!'}
-    subtitle={`The word is ${game_state.word_to_guess.name}`}
+    subtitle={`The word is ${game_state.word_to_guess}`}
     restart_button_text={'Go again'}
     on:click={handle_restart}
   />
@@ -139,7 +146,7 @@
 {#if playing_state === 'failed'}
   <Confetti
     title={'You Lost!'}
-    subtitle={`The word is ${game_state.word_to_guess.name}`}
+    subtitle={`The word is ${game_state.word_to_guess}`}
     restart_button_text={'Try again'}
     on:click={handle_restart}
   />
@@ -221,6 +228,8 @@
     <Keyboard
       on:stroke={key => handle_stroke(key.detail)}
       bind:incorrect_keys
+      bind:correct_keys
+      bind:improper_keys
     />
   </div>
   <div class="guess_button_area">
