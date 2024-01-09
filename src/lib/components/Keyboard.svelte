@@ -70,14 +70,16 @@
     const is_in_incorrect_keys = incorrect_keys.includes(character);
 
     if (is_in_correct_keys) {
-      return 'correct_key';
+      return 'correct_guess';
     }
     if (is_in_improper_keys) {
-      return 'improper_key';
+      return 'improper_guess';
     }
     if (is_in_incorrect_keys) {
-      return 'incorrect_key';
+      return 'incorrect_guess';
     }
+
+    return '';
   }
 </script>
 
@@ -148,7 +150,7 @@
             data-testid="icon-backspace"
           >
             <path
-              fill="var(--text-color)"
+              fill="var(--key-text-color)"
               d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"
             >
             </path>
@@ -177,29 +179,28 @@
   }
 
   .keyboard_key {
-    --text-color: black;
-    --key-bg: lightgray;
+    color: var(--key-text-color);
+    background-color: var(--key-background-color);
+    border: var(--key-border);
+    border-radius: var(--key-border-radius);
+    font-family: var(--key-font-family);
 
-    font-family: 'Courier New';
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.3);
+
     font-size: 1.25rem;
     font-weight: bold;
-    border: 0;
     padding: 0;
     margin: 0 6px 0 0;
     height: 58px;
-    border-radius: 4px;
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
-    color: var(--text-color);
-    background-color: var(--key-bg);
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     text-transform: uppercase;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.3);
   }
 
   .keyboard_key:last-of-type {
@@ -212,20 +213,5 @@
 
   .keyboard_key-one_and_a_half {
     flex: 1.5;
-  }
-
-  .correct_key {
-    background-color: lightgreen;
-    color: white;
-  }
-
-  .improper_key {
-    background-color: #ffbf00;
-    color: white;
-  }
-
-  .incorrect_key {
-    background-color: gray;
-    color: white;
   }
 </style>

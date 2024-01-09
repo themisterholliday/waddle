@@ -8,7 +8,9 @@
   <div class="winner_container">
     <h1>{title}</h1>
     <p>{subtitle}</p>
-    <button type="button" on:click>{restart_button_text}</button>
+    <button type="button" class="default_button" on:click
+      >{restart_button_text}</button
+    >
   </div>
 </div>
 
@@ -26,12 +28,12 @@
   }
 
   .winner_container {
-    background-color: white;
-    padding-inline: 2rem;
-    padding-block: 1rem;
+    background-color: var(--bg-color);
+    padding-inline: 4rem;
+    padding-block: 2rem;
     border-radius: 1.5rem;
-    border: solid 2px rgba(0, 0, 0, 0.5);
     text-align: center;
+    border: 2px solid var(--opposite-bg-color);
   }
 
   .bg-confetti-animated {
@@ -42,10 +44,5 @@
 
   button {
     margin-top: 2rem;
-    width: 8rem;
-    height: 3rem;
-    border-radius: 0.25rem;
-    background-color: lightblue;
-    cursor: pointer;
   }
 </style>

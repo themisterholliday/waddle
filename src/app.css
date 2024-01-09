@@ -116,4 +116,110 @@ body {
   padding: 0;
   max-height: -webkit-fill-available;
   touch-action: pan-x pan-y;
+  background-color: var(--bg-color);
+}
+
+:root {
+  --primary-color: #9a97f3;
+  --secondary-color: #818cab;
+  --error-color: lightcoral;
+  --font-color: white;
+  --opposite-font-color: black;
+  --bg-color: white;
+  --opposite-bg-color: black;
+  --font-family: 'Courier New';
+
+  --tile-text-color: black;
+  --tile-background-color: none;
+  --tile-border: solid 2px var(--secondary-color);
+  --tile-border-radius: 0.25rem;
+  --tile-font-family: var(--font-family);
+
+  --key-text-color: black;
+  --key-background-color: lightgray;
+  --key-border: 0;
+  --key-border-radius: 0.25rem;
+  --key-font-family: var(--font-family);
+
+  --correct-character-color: lightgreen;
+  --correct-character-text-color: white;
+  --improper-character-color: #ffbf00;
+  --improper-character-text-color: white;
+  --incorrect-character-color: gray;
+  --incorrect-character-text-color: white;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-color: #9a97f3;
+    --secondary-color: #818cab;
+    --error-color: lightcoral;
+    --font-color: black;
+    --opposite-font-color: white;
+    --bg-color: black;
+    --opposite-bg-color: white;
+
+    --tile-text-color: white;
+    --tile-background-color: none;
+    --tile-border: solid 2px var(--secondary-color);
+    --tile-border-radius: 0.25rem;
+    --tile-font-family: var(--font-family);
+  }
+}
+
+/* [data-theme='default'] {
+  --primary-color: #9a97f3;
+  --secondary-color: #818cab;
+  --font-color: #e1e1ff;
+  --bg-color: #161625;
+  --heading-color: #818cab;
+}
+
+[data-theme='dark'] {
+  --primary-color: #9a97f3;
+  --secondary-color: #818cab;
+  --font-color: white;
+  --bg-color: #161625;
+  --heading-color: #818cab;
+/* } */
+
+button {
+  border: 1px solid var(--secondary-color);
+  color: var(--font-color);
+  background-color: var(--primary-color);
+}
+
+button:disabled {
+  border: 1px solid gray;
+  color: gray;
+  background-color: transparent;
+}
+
+.default_button {
+  width: 8rem;
+  height: 3rem;
+  border-radius: 0.25rem;
+}
+
+.correct_guess {
+  --tile-background-color: var(--correct-character-color);
+  --tile-text-color: var(--correct-character-text-color);
+  --key-background-color: var(--correct-character-color);
+  --key-text-color: var(--correct-character-text-color);
+}
+
+.improper_guess {
+  --tile-background-color: var(--improper-character-color);
+  --tile-text-color: var(--improper-character-text-color);
+  --key-background-color: var(--improper-character-color);
+  --key-text-color: var(--improper-character-text-color);
+}
+
+.incorrect_guess {
+  --tile-background-color: var(--incorrect-character-color);
+  --tile-text-color: var(--incorrect-character-text-color);
+  --key-background-color: var(--incorrect-character-color);
+  --key-text-color: var(--incorrect-character-text-color);
 }

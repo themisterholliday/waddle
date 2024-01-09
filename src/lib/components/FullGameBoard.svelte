@@ -4,6 +4,7 @@
   import Confetti from './Confetti.svelte';
   import Keyboard from './Keyboard.svelte';
   import Settings from './Settings.svelte';
+  import refresh_svg from '../../assets/refresh.svg';
 
   let word_length = 5;
   let game_state_manager = get_game_state_manager({word_length: word_length});
@@ -172,27 +173,34 @@
       />
       <h1>Waddle</h1>
     </div>
-    <button class="settings-cog" on:click|stopPropagation={open_dialog}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.847.516 1.874.282 2.572-1.065z"
-        ></path>
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-        ></path>
-      </svg>
-    </button>
+    <div class="settings_button_group">
+      {#if playing_state === 'succeeded'}
+        <button class="refresh_button" on:click={handle_restart}>
+          <img src={refresh_svg} alt="refresh icon" />
+        </button>
+      {/if}
+      <button class="settings-cog" on:click|stopPropagation={open_dialog}>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.847.516 1.874.282 2.572-1.065z"
+          ></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          ></path>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <div class="guessing_area" style="--word_length: {word_length};">
@@ -249,15 +257,18 @@
   <div class="guess_button_area">
     {#if entered_word.length === word_length}
       {#if is_valid_word}
-        <button on:click={handle_guess} class="guess_button submit">
+        <button
+          on:click={handle_guess}
+          class="guess_button submit default_button"
+        >
           Guess
         </button>
       {/if}
       {#if !is_valid_word}
-        <button class="guess_button error"> Not a word! </button>
+        <button class="guess_button error default_button"> Not a word! </button>
       {/if}
     {:else}
-      <button disabled class="guess_button"> Guess </button>
+      <button disabled class="guess_button default_button"> Guess </button>
     {/if}
   </div>
 </div>
@@ -294,22 +305,25 @@
 
     width: 52px;
     height: 52px;
-    border-radius: 0.25rem;
+    border-radius: var(--tile-border-radius);
+    color: var(--tile-text-color);
+    background-color: var(--tile-background-color);
   }
 
   .grid_item_content {
+    border: var(--tile-border);
+    border-radius: var(--tile-border-radius);
+    font-family: var(--tile-font-family);
+
     width: 100%;
     height: 100%;
-    border: solid 2px gray;
-    border-radius: 0.25rem;
 
-    font-family: 'Courier New';
     display: inline-flex;
     justify-content: center;
     align-items: center;
     font-size: 2rem;
-    line-height: 1;
     font-weight: bold;
+    line-height: 1;
     vertical-align: middle;
     box-sizing: border-box;
     text-transform: uppercase;
@@ -327,36 +341,16 @@
     margin: 0 auto;
   }
 
-  .guess_button {
-    width: 8rem;
-    height: 3rem;
-    border-radius: 0.25rem;
-  }
-
   .guess_button.submit {
-    background-color: lightblue;
+    background-color: var(--primary-color);
   }
 
   .guess_button.error {
-    background-color: lightcoral;
-  }
-
-  .correct_guess {
-    background-color: lightgreen;
-    color: white;
-  }
-
-  .improper_guess {
-    background-color: #ffbf00;
-    color: white;
-  }
-
-  .incorrect_guess {
-    background-color: lightslategray;
-    color: white;
+    background-color: var(--error-color);
   }
 
   .settings-cog {
+    color: var(--opposite-font-color);
     cursor: pointer;
     background: none;
     border: none;
@@ -367,6 +361,25 @@
     height: 42px;
 
     -webkit-tap-highlight-color: transparent;
+  }
+
+  .refresh_button {
+    color: var(--opposite-font-color);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    width: 42px;
+    height: 42px;
+
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .settings_button_group {
+    display: flex;
+    align-items: center;
   }
 
   .header {

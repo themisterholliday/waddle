@@ -46,6 +46,9 @@
   });
 </script>
 
+{#if open}
+  <div class="background"></div>
+{/if}
 <dialog {open} on:close={handle_close} bind:this={dialog}>
   <div class="dialog_container">
     <h2>Settings</h2>
@@ -62,7 +65,9 @@
         {/each}
       </select>
     </div>
-    <button on:click={handle_close}>Close</button>
+    <button class="close-button default_button" on:click={handle_close}>
+      Close
+    </button>
   </div>
 </dialog>
 
@@ -76,15 +81,17 @@
     padding: 20px;
     border: none;
     border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    background-color: white;
+    background-color: var(--bg-color);
+    border: 2px solid var(--opposite-bg-color);
     z-index: 1;
   }
 
   .dialog_container {
+    position: relative;
     height: 100%;
     display: flex;
     flex-direction: column;
+    z-index: 10;
   }
 
   .settings_item {
@@ -102,10 +109,18 @@
     border: 1px solid #ccc;
   }
 
-  button {
-    width: 8rem;
-    height: 3rem;
-    border-radius: 0.25rem;
+  .close-button {
     margin: 0 auto;
+  }
+
+  .background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
   }
 </style>
