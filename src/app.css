@@ -1,3 +1,5 @@
+/* Begin reset */
+
 /* Box sizing rules */
 *,
 *::before,
@@ -111,6 +113,14 @@ body {
     'Noto Color Emoji';
 }
 
+/* End reset */
+
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('/fonts/Silkscreen-Regular.ttf');
+  line-height: 1.4;
+}
+
 #app {
   height: 100%;
   padding: 0;
@@ -129,11 +139,18 @@ body {
   --opposite-bg-color: black;
   --font-family: 'Courier New';
 
+  --guess-button-bg-submit-color: var(--primary-color);
+  --guess-button-text-submit-color: var(--font-color);
+
+  --guess-button-bg-error-color: var(--error-color);
+  --guess-button-text-error-color: var(--font-color);
+
   --tile-text-color: black;
   --tile-background-color: none;
-  --tile-border: solid 2px var(--secondary-color);
+  --tile-border: 2px solid var(--secondary-color);
   --tile-border-radius: 0.25rem;
   --tile-font-family: var(--font-family);
+  --tile-line-height: 1.6;
 
   --key-text-color: black;
   --key-background-color: lightgray;
@@ -143,47 +160,100 @@ body {
 
   --correct-character-color: lightgreen;
   --correct-character-text-color: white;
+  --correct-character-border: 2px solid transparent;
+
   --improper-character-color: #ffbf00;
   --improper-character-text-color: white;
+  --improper-character-border: 2px solid transparent;
+
   --incorrect-character-color: gray;
   --incorrect-character-text-color: white;
+  --incorrect-character-border: 2px solid transparent;
+
+  --correct-character-key-color: lightgreen;
+  --correct-character-key-text-color: white;
+  --correct-character-key-border: 0;
+
+  --improper-character-key-color: #ffbf00;
+  --improper-character-key-text-color: white;
+  --improper-character-key-border: 0;
+
+  --incorrect-character-key-color: gray;
+  --incorrect-character-key-text-color: white;
+  --incorrect-character-key-border: 0;
 
   color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary-color: #9a97f3;
-    --secondary-color: #818cab;
-    --error-color: lightcoral;
-    --font-color: black;
-    --opposite-font-color: white;
-    --bg-color: black;
-    --opposite-bg-color: white;
-
-    --tile-text-color: white;
-    --tile-background-color: none;
-    --tile-border: solid 2px var(--secondary-color);
-    --tile-border-radius: 0.25rem;
-    --tile-font-family: var(--font-family);
-  }
-}
-
-/* [data-theme='default'] {
-  --primary-color: #9a97f3;
-  --secondary-color: #818cab;
-  --font-color: #e1e1ff;
-  --bg-color: #161625;
-  --heading-color: #818cab;
 }
 
 [data-theme='dark'] {
   --primary-color: #9a97f3;
   --secondary-color: #818cab;
-  --font-color: white;
-  --bg-color: #161625;
-  --heading-color: #818cab;
-/* } */
+  --error-color: lightcoral;
+  --font-color: black;
+  --opposite-font-color: white;
+  --bg-color: black;
+  --opposite-bg-color: white;
+
+  --tile-text-color: white;
+  --tile-background-color: none;
+  --tile-border: solid 2px var(--secondary-color);
+  --tile-border-radius: 0.25rem;
+  --tile-font-family: var(--font-family);
+}
+
+[data-theme='gameboy'] {
+  --primary-color: #c4cfa1;
+  --secondary-color: #8b956d;
+  --error-color: #8b956d;
+  --font-color: var(--secondary-color);
+  --opposite-font-color: var(--secondary-color);
+  --bg-color: var(--primary-color);
+  --opposite-bg-color: black;
+  --font-family: 'Silkscreen';
+  --tile-line-height: 1.4;
+
+  --guess-button-bg-submit-color: #1f1f1f;
+  --guess-button-text-submit-color: var(--font-color);
+
+  --guess-button-bg-error-color: var(--error-color);
+  --guess-button-text-error-color: var(--primary-color);
+
+  --tile-text-color: black;
+  --tile-background-color: none;
+  --tile-border: 2px solid var(--secondary-color);
+  --tile-border-radius: 0;
+  --tile-font-family: var(--font-family);
+
+  --key-text-color: black;
+  --key-background-color: none;
+  --key-border: 2px solid var(--secondary-color);
+  --key-border-radius: 0.25rem;
+  --key-font-family: var(--font-family);
+
+  --correct-character-color: #1f1f1f;
+  --correct-character-text-color: var(--primary-color);
+  --correct-character-border: 2px solid var(--primary-color);
+
+  --improper-character-color: #4d533c;
+  --improper-character-text-color: var(--primary-color);
+  --improper-character-border: 2px solid #4d533c;
+
+  --incorrect-character-color: var(--secondary-color);
+  --incorrect-character-text-color: var(--primary-color);
+  --incorrect-character-border: 2px solid var(--secondary-color);
+
+  --correct-character-key-color: #1f1f1f;
+  --correct-character-key-text-color: var(--primary-color);
+  --correct-character-key-border: 2px solid var(--primary-color);
+
+  --improper-character-key-color: #4d533c;
+  --improper-character-key-text-color: var(--primary-color);
+  --improper-character-key-border: 2px solid #4d533c;
+
+  --incorrect-character-key-color: var(--secondary-color);
+  --incorrect-character-key-text-color: var(--primary-color);
+  --incorrect-character-key-border: 2px solid var(--secondary-color);
+}
 
 button {
   border: 1px solid var(--secondary-color);
@@ -206,20 +276,29 @@ button:disabled {
 .correct_guess {
   --tile-background-color: var(--correct-character-color);
   --tile-text-color: var(--correct-character-text-color);
-  --key-background-color: var(--correct-character-color);
-  --key-text-color: var(--correct-character-text-color);
+  --tile-border: var(--correct-character-border);
+
+  --key-background-color: var(--correct-character-key-color);
+  --key-text-color: var(--correct-character-key-text-color);
+  --key-border: var(--correct-character-key-border);
 }
 
 .improper_guess {
   --tile-background-color: var(--improper-character-color);
   --tile-text-color: var(--improper-character-text-color);
-  --key-background-color: var(--improper-character-color);
-  --key-text-color: var(--improper-character-text-color);
+  --tile-border: var(--improper-character-border);
+
+  --key-background-color: var(--improper-character-key-color);
+  --key-text-color: var(--improper-character-key-text-color);
+  --key-border: var(--improper-character-key-border);
 }
 
 .incorrect_guess {
   --tile-background-color: var(--incorrect-character-color);
   --tile-text-color: var(--incorrect-character-text-color);
-  --key-background-color: var(--incorrect-character-color);
-  --key-text-color: var(--incorrect-character-text-color);
+  --tile-border: var(--incorrect-character-border);
+
+  --key-background-color: var(--incorrect-character-key-color);
+  --key-text-color: var(--incorrect-character-key-text-color);
+  --key-border: var(--incorrect-character-key-border);
 }

@@ -2,6 +2,7 @@
   import {createEventDispatcher, onMount} from 'svelte';
   const dispatch = createEventDispatcher<{
     word_length_change: number;
+    theme_change: string;
   }>();
 
   export let open: boolean = false;
@@ -9,10 +10,18 @@
   export let word_length_options: number[];
   export let word_length: number;
 
+  export let theme_options: string[];
+  export let theme: string;
+
   function handle_word_length_select_change(event: Event) {
     const target = event.target as HTMLSelectElement;
     const number = Number(target.value);
     dispatch('word_length_change', number);
+  }
+
+  function handle_theme_select_change(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    dispatch('theme_change', target.value);
   }
 
   let dialog: HTMLDialogElement;
@@ -65,6 +74,19 @@
         {/each}
       </select>
     </div>
+    <div class="settings_item">
+      <label for="theme_options">Theme:</label>
+      <select
+        name="theme_options"
+        id="theme_options"
+        bind:value={theme}
+        on:change={handle_theme_select_change}
+      >
+        {#each theme_options as option}
+          <option value={option}>{option}</option>
+        {/each}
+      </select>
+    </div>
     <button class="close-button default_button" on:click={handle_close}>
       Close
     </button>
@@ -72,6 +94,11 @@
 </dialog>
 
 <style>
+  h2,
+  label {
+    color: var(--opposite-font-color);
+  }
+
   dialog {
     margin-top: 2rem;
     width: 80%;

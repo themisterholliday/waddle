@@ -11,11 +11,11 @@ TODO:
 - Animations
   - [x] flip animations after word is entered
   - [x] bounce when entering words
-  - make the winning animation not just a modal
+  - [x] make the winning animation not just a modal
 - Themes
-  - make the system
-  - make some cool themes
-  - put the theme options in the settings
-- add some silly penguin stuff
+  - [x] make the system
+  - [x] make some cool themes
+  - [x] put the theme options in the settings
+- [x] add some silly penguin stuff
 - [x] add the key state to the keyboard
 - [x] add a nav bar
