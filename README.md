@@ -1,5 +1,7 @@
 # Waddle Waddle
 
+`pnpm dev`
+
 Like a popular word game.
 
 TODO:

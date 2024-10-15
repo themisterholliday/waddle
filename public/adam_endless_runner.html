@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Endless Runner</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const gravity = 0.8;
+      const jumpForce = -15;
+      let player,
+        obstacles = [],
+        gameSpeed = 5,
+        score = 0,
+        highScore = 0;
+      let distanceTraveled = 0;
+      let playing = false;
+
+      let bgImage = new Image();
+      bgImage.src = 'img/background.webp';
+      let bgX = 0;
+      let contentOffsetY = canvas.height / 5;
+
+      let gameOverImage = new Image();
+      gameOverImage.src = 'img/gameover.webp';
+      let gameInterval = 0;
+
+      class Player {
+        constructor() {
+          this.width = 80;
+          this.height = 80;
+          this.x = 100;
+          this.y = canvas.height - this.height - contentOffsetY;
+          this.dy = 0;
+          this.jumping = false;
+          this.image = new Image();
+          this.image.src = 'img/camel.png';
+        }
+
+        jump() {
+          if (!this.jumping) {
+            this.dy = jumpForce;
+            this.jumping = true;
+          }
+        }
+
+        update() {
+          const groundLevel = canvas.height - this.height - contentOffsetY;
+          if (this.y < groundLevel || this.dy < 0) {
+            this.dy += gravity;
+          } else {
+            this.dy = 0;
+            this.jumping = false;
+            this.y = groundLevel;
+          }
+          this.y += this.dy;
+          this.draw();
+        }
+
+        draw() {
+          ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+      }
+
+      class Obstacle {
+        constructor() {
+          this.width = 60;
+          this.height = Math.random() * 20 + 40;
+          this.x = canvas.width;
+          this.y = canvas.height - this.height - contentOffsetY;
+          this.image = new Image();
+          this.image.src = 'img/spike.png';
+        }
+
+        update() {
+          this.x -= gameSpeed;
+          if (this.x + this.width < 0) {
+            obstacles.splice(obstacles.indexOf(this), 1);
+          }
+          this.draw();
+        }
+
+        draw() {
+          ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+      }
+
+      function spawnObstacle() {
+        const obstacle = new Obstacle();
+        obstacles.push(obstacle);
+      }
+
+      function resetGame() {
+        player = new Player();
+        obstacles = [];
+        score = 0;
+        distanceTraveled = 0;
+        gameSpeed = 5;
+        bgX = 0;
+      }
+
+      function detectCollision() {
+        for (let obstacle of obstacles) {
+          if (
+            player.x < obstacle.x + obstacle.width &&
+            player.x + player.width > obstacle.x &&
+            player.y < obstacle.y + obstacle.height &&
+            player.y + player.height > obstacle.y
+          ) {
+            gameOver();
+          }
+        }
+      }
+
+      function gameOver() {
+        playing = false;
+
+        clearInterval(gameInterval);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        var size = canvas.width / 3;
+
+        ctx.drawImage(
+          gameOverImage,
+          canvas.width / 2 - size / 2,
+          canvas.height / 2 - size / 2,
+          size,
+          size
+        );
+      }
+
+      function updateGame() {
+        if (!playing) {
+          return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        bgX -= gameSpeed / 2;
+        if (bgX <= -canvas.width) {
+          bgX = 0;
+        }
+
+        ctx.drawImage(bgImage, bgX, 0, canvas.width, canvas.height);
+        ctx.drawImage(
+          bgImage,
+          bgX + canvas.width,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+        player.update();
+
+        for (let obstacle of obstacles) {
+          obstacle.update();
+        }
+
+        detectCollision();
+
+        distanceTraveled += gameSpeed;
+        score = Math.floor(distanceTraveled / 10);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText('Distance: ' + score, 10, 30);
+        highScore = Math.max(highScore, score);
+        ctx.fillText('High Score: ' + highScore, 10, 60);
+
+        gameSpeed += 0.002;
+
+        requestAnimationFrame(updateGame);
+      }
+
+      function init() {
+        if (playing) return;
+
+        playing = true;
+
+        resetGame();
+
+        gameInterval = setInterval(() => {
+          spawnObstacle();
+
+          obstacles.forEach(obstacle => {
+            if (gameSpeed > 7 && Math.random() > 0.7) {
+              obstacle.width = Math.random() * 50 + 20;
+              obstacle.height = Math.random() * 50 + 20;
+            }
+          });
+        }, 1500);
+        updateGame();
+      }
+
+      canvas.addEventListener('touchstart', e => {
+        init();
+        player.jump();
+        e.preventDefault();
+      });
+
+      canvas.addEventListener('mousedown', e => {
+        init();
+        player.jump();
+      });
+
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    </script>
+  </body>
+</html>
